@@ -15,7 +15,7 @@ const ZONE_COLORS = [
 
 export default function App() {
     // App State
-    const [apiKey, setApiKey] = useState('AIzaSyDRAjsIWDfwjNlmn1HAlv8eIfIBaT9r6Bs');
+    const [apiKey, setApiKey] = useState(import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '');
     const [center, setCenter] = useState({ lat: 36.1389318, lng: -115.2245634 }); // Default: 2780 S Jones Blvd, Las Vegas NV 89146
     const [unit, setUnit] = useState('mi'); // 'mi' or 'km'
     const [isDarkMode, setIsDarkMode] = useState(false); // Default to light mode
