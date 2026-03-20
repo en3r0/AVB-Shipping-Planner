@@ -2,7 +2,7 @@ import React from 'react';
 import { Download, Database } from 'lucide-react';
 
 export default function ResultsTable({ results, unit, categoryPricingEnabled, categories }) {
-    const handleExport = async () => {
+    const handleExport = () => {
         if (results.length === 0) return;
 
         let headers, rows;
@@ -30,30 +30,16 @@ export default function ResultsTable({ results, unit, categoryPricingEnabled, ca
             ...rows.map(e => e.join(','))
         ].join('\n');
 
-        // POST to our server endpoint which responds with proper
-        // Content-Disposition: attachment headers.
-        try {
-            const response = await fetch('/api/download-csv', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    csvContent,
-                    filename: 'avb_shipping_planner.csv'
-                })
-            });
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'avb_shipping_planner.csv';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error('Export failed:', error);
-        }
+        // Client-side download — no backend needed
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'avb_shipping_planner.csv';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     };
 
     if (results.length === 0) {
