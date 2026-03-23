@@ -187,6 +187,7 @@ export default function App() {
 
                 <ResultsTable
                     results={calculatedZipCodes}
+                    zones={zones}
                     unit={unit}
                     categoryPricingEnabled={categoryPricingEnabled}
                     categories={categories}
