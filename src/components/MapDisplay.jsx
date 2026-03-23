@@ -125,7 +125,56 @@ function ZoneCircle({ map, center, radius, color, unit }) {
     return null;
 }
 
-export default function MapDisplay({ center, zones, unit, apiKey, isDarkMode }) {
+// Marker component for each location
+function LocationMarker({ map, position, label }) {
+    const [marker, setMarker] = useState(null);
+
+    useEffect(() => {
+        if (!map || !window.google || !position.lat || !position.lng) return;
+
+        const newMarker = new window.google.maps.Marker({
+            map,
+            position,
+            label: {
+                text: label,
+                color: '#ffffff',
+                fontWeight: 'bold',
+                fontSize: '13px'
+            },
+            icon: {
+                path: window.google.maps.SymbolPath.CIRCLE,
+                scale: 14,
+                fillColor: '#6366f1',
+                fillOpacity: 1,
+                strokeColor: '#ffffff',
+                strokeWeight: 2,
+            }
+        });
+
+        setMarker(newMarker);
+
+        return () => {
+            newMarker.setMap(null);
+        };
+    }, [map]);
+
+    // Update reactively
+    useEffect(() => {
+        if (marker && position.lat && position.lng) {
+            marker.setPosition(position);
+            marker.setLabel({
+                text: label,
+                color: '#ffffff',
+                fontWeight: 'bold',
+                fontSize: '13px'
+            });
+        }
+    }, [marker, position, label]);
+
+    return null;
+}
+
+export default function MapDisplay({ center, locations, zones, unit, apiKey, isDarkMode }) {
     const { isLoaded, loadError } = useJsApiLoader({
         id: 'google-map-script',
         googleMapsApiKey: apiKey || ''
@@ -149,6 +198,9 @@ export default function MapDisplay({ center, zones, unit, apiKey, isDarkMode }) 
         );
     }
 
+    // Get valid locations (those with coordinates)
+    const validLocations = (locations || []).filter(loc => loc.lat != null && loc.lng != null);
+
     return (
         <div className="glass-panel map-container" style={{ height: '100%', minHeight: '400px', width: '100%' }}>
             <GoogleMap
@@ -159,20 +211,32 @@ export default function MapDisplay({ center, zones, unit, apiKey, isDarkMode }) 
                 onLoad={map => setMapInstance(map)}
                 onUnmount={() => setMapInstance(null)}
             >
-                {/* Render custom manual circles to avoid library ghosting bugs */}
-                {mapInstance && [...zones]
-                    .filter(zone => zone.radius && Number(zone.radius) > 0)
-                    .sort((a, b) => Number(b.radius) - Number(a.radius))
-                    .map(zone => (
-                        <ZoneCircle
-                            key={zone.id}
-                            map={mapInstance}
-                            center={center}
-                            radius={zone.radius}
-                            color={zone.color}
-                            unit={unit}
-                        />
-                    ))}
+                {/* Render circles for EACH location × zone */}
+                {mapInstance && validLocations.map((loc, locIndex) =>
+                    [...zones]
+                        .filter(zone => zone.radius && Number(zone.radius) > 0)
+                        .sort((a, b) => Number(b.radius) - Number(a.radius))
+                        .map(zone => (
+                            <ZoneCircle
+                                key={`${loc.id}-${zone.id}`}
+                                map={mapInstance}
+                                center={{ lat: loc.lat, lng: loc.lng }}
+                                radius={zone.radius}
+                                color={zone.color}
+                                unit={unit}
+                            />
+                        ))
+                )}
+
+                {/* Render a marker for each location */}
+                {mapInstance && validLocations.map((loc, index) => (
+                    <LocationMarker
+                        key={`marker-${loc.id}`}
+                        map={mapInstance}
+                        position={{ lat: loc.lat, lng: loc.lng }}
+                        label={String(index + 1)}
+                    />
+                ))}
             </GoogleMap>
         </div>
     );

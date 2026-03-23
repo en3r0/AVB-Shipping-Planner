@@ -3,7 +3,7 @@ import { Sun, Moon } from 'lucide-react';
 import MapDisplay from './components/MapDisplay';
 import ControlPanel from './components/ControlPanel';
 import ResultsTable from './components/ResultsTable';
-import { calculateZipCodesForZones } from './utils/geo';
+import { calculateZipCodesForMultipleLocations } from './utils/geo';
 
 const ZONE_COLORS = [
   '#10b981',
@@ -16,12 +16,16 @@ const ZONE_COLORS = [
 export default function App() {
     // App State
     const [apiKey, setApiKey] = useState(import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '');
-    const [center, setCenter] = useState({ lat: 36.1389318, lng: -115.2245634 }); // Default: 2780 S Jones Blvd, Las Vegas NV 89146
     const [unit, setUnit] = useState('mi'); // 'mi' or 'km'
     const [isDarkMode, setIsDarkMode] = useState(false); // Default to light mode
     
+    // Multiple locations state
+    const [locations, setLocations] = useState([
+        { id: '1', label: '', lat: 36.1389318, lng: -115.2245634 }
+    ]);
+
     // Resizer State
-    const [sidebarWidth, setSidebarWidth] = useState(380);
+    const [sidebarWidth, setSidebarWidth] = useState(450);
     const [isDragging, setIsDragging] = useState(false);
 
     // Sidebar resize mouse event listeners
@@ -68,18 +72,21 @@ export default function App() {
         { id: '1', radius: '5', price: '5.00', color: ZONE_COLORS[0], categoryPrices: {} }
     ]);
 
-    // Derived zip codes calculation
+    // Derived zip codes calculation — uses all locations, deduplicates automatically
     const calculatedZipCodes = useMemo(() => {
-        return calculateZipCodesForZones(center.lat, center.lng, zones, unit, categoryPricingEnabled, categories);
-    }, [center, zones, unit, categoryPricingEnabled, categories]);
+        return calculateZipCodesForMultipleLocations(locations, zones, unit, categoryPricingEnabled, categories);
+    }, [locations, zones, unit, categoryPricingEnabled, categories]);
 
-    const handleGeocode = async (searchAddress) => {
+    const handleGeocode = async (locationId, searchAddress) => {
         if (!searchAddress.trim() || !apiKey) return;
         try {
             const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(searchAddress)}&key=${apiKey}`);
             const data = await response.json();
             if (data.results && data.results.length > 0) {
-                setCenter(data.results[0].geometry.location);
+                const { lat, lng } = data.results[0].geometry.location;
+                setLocations(prev => prev.map(loc =>
+                    loc.id === locationId ? { ...loc, lat, lng, label: searchAddress } : loc
+                ));
             } else {
                 alert('Address not found. Please try again.');
             }
@@ -87,6 +94,16 @@ export default function App() {
             console.error('Geocoding error:', e);
             alert('Error fetching address coordinates.');
         }
+    };
+
+    const addLocation = () => {
+        const newId = Date.now().toString();
+        setLocations(prev => [...prev, { id: newId, label: '', lat: null, lng: null }]);
+    };
+
+    const removeLocation = (id) => {
+        if (locations.length <= 1) return;
+        setLocations(prev => prev.filter(loc => loc.id !== id));
     };
 
     const addZone = () => {
@@ -131,6 +148,12 @@ export default function App() {
         }));
     };
 
+    // Center map on first location with valid coordinates
+    const mapCenter = useMemo(() => {
+        const validLoc = locations.find(loc => loc.lat != null && loc.lng != null);
+        return validLoc ? { lat: validLoc.lat, lng: validLoc.lng } : { lat: 36.1389318, lng: -115.2245634 };
+    }, [locations]);
+
     return (
         <div 
             className={`app-container ${isDarkMode ? 'theme-dark' : 'theme-light'} ${isDragging ? 'is-dragging' : ''}`}
@@ -142,6 +165,9 @@ export default function App() {
             {/* LEFT SIDEBAR CONTROLS */}
             <div className="sidebar">
                 <ControlPanel
+                    locations={locations}
+                    addLocation={addLocation}
+                    removeLocation={removeLocation}
                     handleGeocode={handleGeocode}
                     unit={unit}
                     setUnit={setUnit}
@@ -202,7 +228,8 @@ export default function App() {
             {/* RIGHT MAP AREA */}
             <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <MapDisplay
-                    center={center}
+                    center={mapCenter}
+                    locations={locations}
                     zones={zones}
                     unit={unit}
                     isDarkMode={isDarkMode}

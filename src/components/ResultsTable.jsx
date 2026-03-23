@@ -8,17 +8,19 @@ export default function ResultsTable({ results, unit, categoryPricingEnabled, ca
         let headers, rows;
 
         if (categoryPricingEnabled && categories.length > 0) {
-            headers = ['Zip Code', `Distance (${unit})`, 'Zone ID', ...categories.map(c => `${c} Price`)];
+            headers = ['Zip Code', 'Location', `Distance (${unit})`, 'Zone ID', ...categories.map(c => `${c} Price`)];
             rows = results.map(r => [
                 `"${String(r.zipCode).padStart(5, '0')}"`,
+                `"${r.locationLabel || ''}"`,
                 `"${r.distance}"`,
                 `"${r.zoneId}"`,
                 ...categories.map(c => `"${r.categoryPrices?.[c] || ''}"`)
             ]);
         } else {
-            headers = ['Zip Code', 'Delivery Price', `Distance (${unit})`, 'Zone ID'];
+            headers = ['Zip Code', 'Location', 'Delivery Price', `Distance (${unit})`, 'Zone ID'];
             rows = results.map(r => [
                 `"${String(r.zipCode).padStart(5, '0')}"`,
+                `"${r.locationLabel || ''}"`,
                 `"${r.price}"`,
                 `"${r.distance}"`,
                 `"${r.zoneId}"`
@@ -65,6 +67,7 @@ export default function ResultsTable({ results, unit, categoryPricingEnabled, ca
                     <thead>
                         <tr>
                             <th>Zip Code</th>
+                            <th>Location</th>
                             <th>Distance ({unit})</th>
                             {categoryPricingEnabled && categories.length > 0 ? (
                                 categories.map(cat => (
@@ -84,6 +87,7 @@ export default function ResultsTable({ results, unit, categoryPricingEnabled, ca
                                         {item.zipCode}
                                     </div>
                                 </td>
+                                <td>{item.locationLabel}</td>
                                 <td>{item.distance}</td>
                                 {categoryPricingEnabled && categories.length > 0 ? (
                                     categories.map(cat => (

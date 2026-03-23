@@ -58,3 +58,30 @@ export function calculateZipCodesForZones(centerLat, centerLng, zones, unit = 'm
   // Sort results by distance
   return results.sort((a, b) => Number(a.distance) - Number(b.distance));
 }
+
+// Calculate zip codes across multiple locations, deduplicating by zip code.
+// When a zip appears from multiple locations, the entry with the shortest distance wins.
+export function calculateZipCodesForMultipleLocations(locations, zones, unit = 'mi', categoryPricingEnabled = false, categories = []) {
+  if (!locations || locations.length === 0 || !zones || zones.length === 0) return [];
+
+  // Collect results from all locations
+  const zipMap = new Map();
+
+  for (const [index, location] of locations.entries()) {
+    const locationResults = calculateZipCodesForZones(
+      location.lat, location.lng, zones, unit, categoryPricingEnabled, categories
+    );
+
+    for (const result of locationResults) {
+      const existing = zipMap.get(result.zipCode);
+      if (!existing || Number(result.distance) < Number(existing.distance)) {
+        // Tag the winning result with its fulfilled location
+        result.locationLabel = location.label || `Location ${index + 1}`;
+        zipMap.set(result.zipCode, result);
+      }
+    }
+  }
+
+  // Convert map to array and sort by distance
+  return Array.from(zipMap.values()).sort((a, b) => Number(a.distance) - Number(b.distance));
+}

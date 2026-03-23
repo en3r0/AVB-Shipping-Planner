@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { Plus, Trash2, MapPin, Search, Tag, X, Sun, Moon } from 'lucide-react';
 
 export default function ControlPanel({
+    locations,
+    addLocation,
+    removeLocation,
     handleGeocode,
     unit,
     setUnit,
@@ -16,8 +19,13 @@ export default function ControlPanel({
     removeCategory,
     updateZoneCategoryPrice
 }) {
-    const [address, setAddress] = useState('');
+    const [addressInputs, setAddressInputs] = useState({});
     const [newCategoryName, setNewCategoryName] = useState('');
+
+    const getAddressValue = (locationId) => addressInputs[locationId] || '';
+    const setAddressValue = (locationId, value) => {
+        setAddressInputs(prev => ({ ...prev, [locationId]: value }));
+    };
 
     const handleAddCategory = () => {
         if (newCategoryName.trim()) {
@@ -33,21 +41,55 @@ export default function ControlPanel({
                 Delivery Restrictions
             </h2>
 
+            {/* Locations */}
             <div className="input-group">
-                <label>Store Address / Center Point</label>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                    <input
-                        type="text"
-                        value={address}
-                        onChange={(e) => setAddress(e.target.value)}
-                        placeholder="E.g., 123 Main St, New York, NY 10001"
-                        style={{ flex: 1 }}
-                        onKeyDown={(e) => e.key === 'Enter' && handleGeocode(address)}
-                    />
-                    <button className="btn" onClick={() => handleGeocode(address)}>
-                        <Search size={18} />
-                    </button>
+                <label>Store Locations</label>
+                <div className="locations-list" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {locations.map((loc, index) => (
+                        <div key={loc.id} className="location-entry animate-slide-down" style={{
+                            display: 'flex',
+                            gap: '8px',
+                            alignItems: 'center',
+                            padding: '10px 12px',
+                            background: 'var(--glass-bg)',
+                            border: '1px solid var(--glass-border)',
+                            borderRadius: '10px',
+                            transition: 'border-color 0.2s ease'
+                        }}>
+                            <span style={{
+                                fontSize: '0.75rem',
+                                fontWeight: 700,
+                                color: 'var(--accent)',
+                                minWidth: '18px',
+                                textAlign: 'center',
+                                lineHeight: 1
+                            }}>{index + 1}</span>
+                            <input
+                                type="text"
+                                value={getAddressValue(loc.id)}
+                                onChange={(e) => setAddressValue(loc.id, e.target.value)}
+                                placeholder={index === 0 ? "E.g., 123 Main St, New York, NY 10001" : "Enter another address..."}
+                                style={{ flex: 1, margin: 0 }}
+                                onKeyDown={(e) => e.key === 'Enter' && handleGeocode(loc.id, getAddressValue(loc.id))}
+                            />
+                            <button className="btn" onClick={() => handleGeocode(loc.id, getAddressValue(loc.id))} style={{ padding: '6px 10px' }}>
+                                <Search size={16} />
+                            </button>
+                            {locations.length > 1 && (
+                                <button className="remove-btn" onClick={() => removeLocation(loc.id)} style={{ padding: '4px' }}>
+                                    <Trash2 size={14} />
+                                </button>
+                            )}
+                        </div>
+                    ))}
                 </div>
+                <button
+                    className="btn btn-secondary"
+                    style={{ width: '100%', marginTop: '10px', fontSize: '0.9rem', padding: '10px' }}
+                    onClick={addLocation}
+                >
+                    <Plus size={16} /> Add Location
+                </button>
             </div>
 
             <div className="input-group">
