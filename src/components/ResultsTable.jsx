@@ -66,7 +66,7 @@ export default function ResultsTable({ results, zones, unit, categoryPricingEnab
 
         const lines = [
             `"Rule Name","Price","Zip Codes"`,
-            `"Member Name (AVBID) - No Shipping","","${allZipCodes}"`
+            `"Member Name (AVBID) - No Shipping","",="""${allZipCodes}"""`
         ];
 
         const sortedZones = [...(zones || [])].sort((a, b) => Number(a.radius) - Number(b.radius));
@@ -79,7 +79,7 @@ export default function ResultsTable({ results, zones, unit, categoryPricingEnab
                 .join(',');
 
             if (zipsInZone) {
-                lines.push(`"Member Name (AVBID) - ${zone.radius || 0}mi","${zone.price || 0}","${zipsInZone}"`);
+                lines.push(`"Member Name (AVBID) - ${zone.radius || 0}mi","${zone.price || 0}",="""${zipsInZone}"""`);
             }
         });
 
