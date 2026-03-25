@@ -201,6 +201,21 @@ export default function MapDisplay({ center, locations, zones, unit, apiKey, isD
     // Get valid locations (those with coordinates)
     const validLocations = (locations || []).filter(loc => loc.lat != null && loc.lng != null);
 
+    // Auto-fit bounds logic
+    useEffect(() => {
+        if (!mapInstance || !window.google || validLocations.length === 0) return;
+
+        if (validLocations.length === 1) {
+            mapInstance.setCenter({ lat: validLocations[0].lat, lng: validLocations[0].lng });
+        } else {
+            const bounds = new window.google.maps.LatLngBounds();
+            validLocations.forEach(loc => {
+                bounds.extend(new window.google.maps.LatLng(loc.lat, loc.lng));
+            });
+            mapInstance.fitBounds(bounds);
+        }
+    }, [mapInstance, locations]);
+
     return (
         <div className="glass-panel map-container" style={{ height: '100%', minHeight: '400px', width: '100%' }}>
             <GoogleMap

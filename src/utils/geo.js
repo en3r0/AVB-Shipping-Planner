@@ -19,8 +19,9 @@ export function getDistance(lat1, lon1, lat2, lon2, unit = 'mi') {
 export function calculateZipCodesForZones(centerLat, centerLng, zones, unit = 'mi', categoryPricingEnabled = false, categories = []) {
   if (!centerLat || !centerLng || !zones || zones.length === 0) return [];
 
-  // Sort zones by radius (smallest to largest)
-  const sortedZones = [...zones].sort((a, b) => Number(a.radius) - Number(b.radius));
+  // Filter out invalid zones and sort by radius (smallest to largest)
+  const validZones = zones.filter(z => z.radius !== '' && Number(z.radius) > 0);
+  const sortedZones = [...validZones].sort((a, b) => Number(a.radius) - Number(b.radius));
   
   const results = [];
   

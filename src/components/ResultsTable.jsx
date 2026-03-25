@@ -69,7 +69,8 @@ export default function ResultsTable({ results, zones, unit, categoryPricingEnab
             `"Member Name (AVBID) - No Shipping","","'${allZipCodes}"`
         ];
 
-        const sortedZones = [...(zones || [])].sort((a, b) => Number(a.radius) - Number(b.radius));
+        const validZones = (zones || []).filter(z => z.radius !== '' && Number(z.radius) > 0);
+        const sortedZones = [...validZones].sort((a, b) => Number(a.radius) - Number(b.radius));
 
         sortedZones.forEach((zone, index) => {
             const zoneId = index + 1;
@@ -79,7 +80,14 @@ export default function ResultsTable({ results, zones, unit, categoryPricingEnab
                 .join(',');
 
             if (zipsInZone) {
-                lines.push(`"Member Name (AVBID) - ${zone.radius || 0}mi","${zone.price || 0}","'${zipsInZone}"`);
+                if (categoryPricingEnabled && categories.length > 0) {
+                    categories.forEach(cat => {
+                        const price = zone.categoryPrices?.[cat] || 0;
+                        lines.push(`"Member Name (AVBID) - ${cat} - ${zone.radius || 0}mi","${price}","'${zipsInZone}"`);
+                    });
+                } else {
+                    lines.push(`"Member Name (AVBID) - ${zone.radius || 0}mi","${zone.price || 0}","'${zipsInZone}"`);
+                }
             }
         });
 
@@ -154,7 +162,7 @@ export default function ResultsTable({ results, zones, unit, categoryPricingEnab
                         </tr>
                     </thead>
                     <tbody>
-                        {results.map((item, i) => (
+                        {results.slice(0, 1000).map((item, i) => (
                             <tr key={`${item.zipCode}-${i}`}>
                                 <td>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -176,6 +184,11 @@ export default function ResultsTable({ results, zones, unit, categoryPricingEnab
                     </tbody>
                 </table>
             </div>
+            {results.length > 1000 && (
+                <div style={{ textAlign: 'center', padding: '12px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                    Showing first 1000 of {results.length.toLocaleString()} results. Export to CSV to view all.
+                </div>
+            )}
         </div>
     );
 }
