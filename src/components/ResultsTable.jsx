@@ -61,19 +61,15 @@ export default function ResultsTable({ results, zones, unit, categoryPricingEnab
     const handleExportRules = () => {
         if (results.length === 0) return;
 
-        let allZipCodes = results.map(r => String(r.zipCode).padStart(5, '0'));
-        allZipCodes = [...new Set(allZipCodes)].join(',');
-
         const lines = [
-            `"Rule Name","Price","Zip Codes"`,
-            `"Member Name (AVBID) - No Shipping","","'${allZipCodes}"`
+            `"Rule Name","Price","Zip Codes"`
         ];
 
         const validZones = (zones || []).filter(z => z.radius !== '' && Number(z.radius) > 0);
         const sortedZones = [...validZones].sort((a, b) => Number(a.radius) - Number(b.radius));
 
-        sortedZones.forEach((zone, index) => {
-            const zoneId = index + 1;
+        sortedZones.forEach((zone) => {
+            const zoneId = zones.indexOf(zone) + 1;
             const zipsInZone = results
                 .filter(r => r.zoneId === zoneId)
                 .map(r => String(r.zipCode).padStart(5, '0'))
@@ -83,10 +79,10 @@ export default function ResultsTable({ results, zones, unit, categoryPricingEnab
                 if (categoryPricingEnabled && categories.length > 0) {
                     categories.forEach(cat => {
                         const price = zone.categoryPrices?.[cat] || 0;
-                        lines.push(`"Member Name (AVBID) - ${cat} - ${zone.radius || 0}mi","${price}","'${zipsInZone}"`);
+                        lines.push(`"Member Name (AVBID) - ${cat} - ${zone.radius || 0}mi","${price}","${zipsInZone}"`);
                     });
                 } else {
-                    lines.push(`"Member Name (AVBID) - ${zone.radius || 0}mi","${zone.price || 0}","'${zipsInZone}"`);
+                    lines.push(`"Member Name (AVBID) - ${zone.radius || 0}mi","${zone.price || 0}","${zipsInZone}"`);
                 }
             }
         });

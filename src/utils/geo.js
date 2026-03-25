@@ -34,8 +34,8 @@ export function calculateZipCodesForZones(centerLat, centerLng, zones, unit = 'm
     const matchingZone = sortedZones.find(zone => distance <= Number(zone.radius));
     
     if (matchingZone) {
-      // Use the zone's position in the sorted list (1-indexed) as a human-readable zone number
-      const zoneNumber = sortedZones.indexOf(matchingZone) + 1;
+      // Use the zone's original index (1-based) to match UI "Zone 1", "Zone 2", etc.
+      const zoneNumber = zones.indexOf(matchingZone) + 1;
       const result = {
         zipCode: zip,
         distance: distance.toFixed(2),

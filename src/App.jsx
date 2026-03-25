@@ -58,7 +58,9 @@ export default function App() {
     useEffect(() => {
         if (isDarkMode) {
             document.body.classList.remove('theme-light');
+            document.body.classList.add('theme-dark');
         } else {
+            document.body.classList.remove('theme-dark');
             document.body.classList.add('theme-light');
         }
     }, [isDarkMode]);
@@ -78,7 +80,11 @@ export default function App() {
     }, [locations, zones, unit, categoryPricingEnabled, categories]);
 
     const handleGeocode = async (locationId, searchAddress) => {
-        if (!searchAddress.trim() || !apiKey) return;
+        if (!apiKey) {
+            alert('Please provide a Google Maps API Key in your environment variables.');
+            return;
+        }
+        if (!searchAddress.trim()) return;
         try {
             const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(searchAddress)}&key=${apiKey}`);
             const data = await response.json();
@@ -109,14 +115,13 @@ export default function App() {
     const addZone = () => {
         if (zones.length >= 5) return;
         const newId = Date.now().toString();
-        const color = ZONE_COLORS[zones.length];
+        const usedColors = zones.map(z => z.color);
+        const color = ZONE_COLORS.find(c => !usedColors.includes(c)) || ZONE_COLORS[0];
         setZones([...zones, { id: newId, radius: '', price: '', color, categoryPrices: {} }]);
     };
 
     const removeZone = (id) => {
-        const newZones = zones.filter(z => z.id !== id);
-        const updatedZones = newZones.map((z, idx) => ({ ...z, color: ZONE_COLORS[idx] }));
-        setZones(updatedZones);
+        setZones(zones.filter(z => z.id !== id));
     };
 
     const updateZone = (id, field, value) => {
@@ -148,11 +153,8 @@ export default function App() {
         }));
     };
 
-    // Center map on first location with valid coordinates
-    const mapCenter = useMemo(() => {
-        const validLoc = locations.find(loc => loc.lat != null && loc.lng != null);
-        return validLoc ? { lat: validLoc.lat, lng: validLoc.lng } : { lat: 36.1389318, lng: -115.2245634 };
-    }, [locations]);
+    // Static center so MapDisplay's fitBounds can work without interference from prop updates
+    const [mapCenter] = useState({ lat: 36.1389318, lng: -115.2245634 });
 
     return (
         <div 
