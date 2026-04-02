@@ -293,7 +293,6 @@ select:focus {
 }
 
 .results-table-container {
-  margin-top: 24px;
   max-height: 400px;
   overflow-y: auto;
 }
@@ -464,7 +463,7 @@ select:focus {
 
 .category-price-label {
   font-size: 0.85rem;
-  color: #c4b5fd;
+  color: var(--text-muted);
   min-width: 80px;
   white-space: nowrap;
   overflow: hidden;

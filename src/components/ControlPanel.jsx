@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, MapPin, Search, Tag, X, Sun, Moon } from 'lucide-react';
+import { Plus, Trash2, MapPin, Search, Tag, X } from 'lucide-react';
 
 export default function ControlPanel({
     locations,

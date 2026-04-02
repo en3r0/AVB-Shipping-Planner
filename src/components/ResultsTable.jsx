@@ -79,7 +79,7 @@ export default function ResultsTable({ results, zones, unit, categoryPricingEnab
                 .join(',');
 
             if (zipsInZone) {
-                lines.push(`"Member Name (AVBID) - ${zone.radius || 0}mi","${zone.price || 0}","'${zipsInZone}"`);
+                lines.push(`"Member Name (AVBID) - ${zone.radius || 0}${unit}","${zone.price || 0}","'${zipsInZone}"`);
             }
         });
 

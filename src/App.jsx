@@ -181,8 +181,6 @@ export default function App() {
                     addCategory={addCategory}
                     removeCategory={removeCategory}
                     updateZoneCategoryPrice={updateZoneCategoryPrice}
-                    isDarkMode={isDarkMode}
-                    setIsDarkMode={setIsDarkMode}
                 />
 
                 <ResultsTable
@@ -204,17 +202,18 @@ export default function App() {
                     alignItems: 'center', 
                     justifyContent: 'space-between'
                 }}>
-                    <label style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: 'var(--text-muted)' }} onClick={() => setIsDarkMode(!isDarkMode)}>
+                    <span style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: 'var(--text-muted)' }} onClick={() => setIsDarkMode(!isDarkMode)}>
                         {isDarkMode ? <Moon size={16} /> : <Sun size={16} />} 
                         <span>{isDarkMode ? 'Dark Mode' : 'Light Mode'}</span>
+                    </span>
+                    <label className="toggle-switch">
+                        <input
+                            type="checkbox"
+                            checked={isDarkMode}
+                            onChange={(e) => setIsDarkMode(e.target.checked)}
+                        />
+                        <span className="toggle-slider"></span>
                     </label>
-                    <button
-                        className={`toggle-switch ${isDarkMode ? 'active' : ''}`}
-                        onClick={() => setIsDarkMode(!isDarkMode)}
-                        style={{ backgroundColor: isDarkMode ? 'var(--accent)' : 'var(--glass-border)' }}
-                    >
-                        <div className="toggle-thumb" style={{ transform: isDarkMode ? 'translateX(20px)' : 'translateX(0)' }} />
-                    </button>
                 </div>
             </div>
 

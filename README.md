@@ -1,16 +1,37 @@
-# React + Vite
+# AVB Shipping Planner
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A delivery zone planning tool for AVB members. Define store locations, set delivery radii and pricing, and generate zip code–based shipping rules for Magento.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Multi-location support** — Add multiple store locations and geocode addresses via Google Maps
+- **Delivery zones** — Up to 5 concentric zones per location with configurable radius and pricing
+- **Category pricing** — Optional per-category pricing (e.g., Furniture vs. Electronics)
+- **Interactive map** — Live Google Maps visualization of delivery zones
+- **Export CSV** — Download matching zip codes with distances and prices
+- **Export Rules** — Generate Magento-ready shipping rule CSVs
+- **Dark / Light mode** — Toggle between themes
+- **Resizable sidebar** — Drag to adjust the control panel width
 
-## React Compiler
+## Setup
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+npm install
+cp .env.example .env
+# Add your Google Maps API key to .env
+npm run dev
+```
 
-## Expanding the ESLint configuration
+## Environment Variables
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+| Variable | Description |
+|---|---|
+| `VITE_GOOGLE_MAPS_API_KEY` | Google Maps API key (Geocoding + Maps JavaScript API) |
+
+## Deployment
+
+Pushes to `main` trigger automatic deployment to GitHub Pages via the included workflow.
+
+## Tech Stack
+
+React 19 · Vite · Google Maps API · us-zips · Lucide Icons
